@@ -20,14 +20,15 @@ import {
   Wifi, 
   Coffee, 
   Tv, 
-  KitchenPot, 
   Utensils,
   Bath,
   Wine,
   CheckSquare,
   ClipboardList,
   Wrench,
-  UserRound
+  UserRound,
+  MoreHorizontal, // Changed from DotsHorizontal
+  ChefHat // Changed from KitchenPot
 } from "lucide-react";
 
 export function RoomGrid() {
@@ -189,7 +190,7 @@ function RoomCard({ room }: { room: Room }) {
         return <Coffee className="h-3.5 w-3.5" />;
       case "kitchenette":
       case "full kitchen":
-        return <KitchenPot className="h-3.5 w-3.5" />;
+        return <ChefHat className="h-3.5 w-3.5" />; // Changed from KitchenPot
       case "mini bar":
       case "bar":
         return <Wine className="h-3.5 w-3.5" />;
@@ -270,7 +271,7 @@ function RoomActions({ room }: { room: Room }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8">
-          <DotsHorizontal className="h-4 w-4" />
+          <MoreHorizontal className="h-4 w-4" /> {/* Changed from DotsHorizontal */}
           <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
@@ -310,4 +311,4 @@ function RoomActions({ room }: { room: Room }) {
   );
 }
 
-import { DotsHorizontal } from "lucide-react";
+// The import for DotsHorizontal is removed since we now use MoreHorizontal
