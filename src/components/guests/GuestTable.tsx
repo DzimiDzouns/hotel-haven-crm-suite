@@ -25,10 +25,13 @@ import { ChevronDown, MoreHorizontal, Search, Plus, UserRound } from "lucide-rea
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { GuestProfile } from "./GuestProfile";
 
 export function GuestTable() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<GuestStatus | "All">("All");
+  const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const filteredGuests = guests.filter((guest) => {
     const matchesSearch =
@@ -41,121 +44,138 @@ export function GuestTable() {
     return matchesSearch && matchesStatus;
   });
 
+  const handleGuestClick = (guest: Guest) => {
+    setSelectedGuest(guest);
+    setProfileOpen(true);
+  };
+
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Guests</CardTitle>
-            <CardDescription>
-              Manage and view your guest database
-            </CardDescription>
+    <>
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Guests</CardTitle>
+              <CardDescription>
+                Manage and view your guest database
+              </CardDescription>
+            </div>
+            <Button size="sm" className="h-8">
+              <Plus className="h-4 w-4 mr-2" />
+              New Guest
+            </Button>
           </div>
-          <Button size="sm" className="h-8">
-            <Plus className="h-4 w-4 mr-2" />
-            New Guest
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search guests..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search guests..."
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  Status: {statusFilter}
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setStatusFilter("All")}>
+                  All
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("Regular")}>
+                  Regular
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("VIP")}>
+                  VIP
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("Corporate")}>
+                  Corporate
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("Blacklisted")}>
+                  Blacklisted
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                Status: {statusFilter}
-                <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setStatusFilter("All")}>
-                All
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("Regular")}>
-                Regular
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("VIP")}>
-                VIP
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("Corporate")}>
-                Corporate
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("Blacklisted")}>
-                Blacklisted
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Guest</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Stay</TableHead>
-                <TableHead>Total Stays</TableHead>
-                <TableHead>Loyalty</TableHead>
-                <TableHead>Date Added</TableHead>
-                <TableHead className="w-[80px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredGuests.map((guest) => (
-                <TableRow key={guest.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {guest.name.split(" ").map(n => n[0]).join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{guest.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {guest.email}
-                        </span>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <GuestStatusBadge status={guest.status} />
-                  </TableCell>
-                  <TableCell>
-                    {guest.lastStay || "N/A"}
-                  </TableCell>
-                  <TableCell>{guest.totalStays}</TableCell>
-                  <TableCell>{guest.loyaltyPoints} pts</TableCell>
-                  <TableCell>{guest.dateCreated}</TableCell>
-                  <TableCell>
-                    <GuestActions guest={guest} />
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filteredGuests.length === 0 && (
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
-                    No guests found.
-                  </TableCell>
+                  <TableHead>Guest</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Last Stay</TableHead>
+                  <TableHead>Total Stays</TableHead>
+                  <TableHead>Loyalty</TableHead>
+                  <TableHead>Date Added</TableHead>
+                  <TableHead className="w-[80px]"></TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+              </TableHeader>
+              <TableBody>
+                {filteredGuests.map((guest) => (
+                  <TableRow 
+                    key={guest.id}
+                    className="cursor-pointer hover:bg-muted/60"
+                    onClick={() => handleGuestClick(guest)}
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {guest.name.split(" ").map(n => n[0]).join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{guest.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {guest.email}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <GuestStatusBadge status={guest.status} />
+                    </TableCell>
+                    <TableCell>
+                      {guest.lastStay || "N/A"}
+                    </TableCell>
+                    <TableCell>{guest.totalStays}</TableCell>
+                    <TableCell>{guest.loyaltyPoints} pts</TableCell>
+                    <TableCell>{guest.dateCreated}</TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <GuestActions guest={guest} onViewProfile={() => handleGuestClick(guest)} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filteredGuests.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="h-24 text-center">
+                      No guests found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <GuestProfile 
+        guest={selectedGuest} 
+        open={profileOpen} 
+        onOpenChange={setProfileOpen} 
+      />
+    </>
   );
 }
 
-function GuestStatusBadge({ status }: { status: GuestStatus }) {
+export function GuestStatusBadge({ status }: { status: GuestStatus }) {
   const variantMap: Record<GuestStatus, { className: string }> = {
     Regular: {
       className: "bg-blue-100 text-blue-800 border-blue-200",
@@ -180,7 +200,7 @@ function GuestStatusBadge({ status }: { status: GuestStatus }) {
   );
 }
 
-function GuestActions({ guest }: { guest: Guest }) {
+function GuestActions({ guest, onViewProfile }: { guest: Guest; onViewProfile: () => void }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -191,7 +211,7 @@ function GuestActions({ guest }: { guest: Guest }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={onViewProfile}>
           <UserRound className="mr-2 h-4 w-4" />
           View profile
         </DropdownMenuItem>
